@@ -189,3 +189,13 @@ print("Thank you for using Zain Quizzes!")
 # add an option for children to skip the question or move fwd and backward to and fro so they can jump to some questions 
 # tell them which questions would they like to attempt every turn they get 
 # can also add an option to time the children and end the quiz if the time limit exceeds find out the current time and tell them what time its is and how much time they got
+#turn this into gui
+#may be add filing for report that can be sent to the teacher after every body has been quizzed
+#make separate panels with passwords for teachers and students so questions cant be accessed
+#add an option to edit the question by entering  the question number
+#add an option to add a question
+#add an option to save the paper for later use in a file or sth
+
+
+
+

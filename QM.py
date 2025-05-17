@@ -2,45 +2,106 @@ def take_quiz(mcqs, short_ques, student_name):
     score = 0
     correct = []
     incorrect = []
+    skipped = set()
+    answers = {}
 
-    print("\n--- Quiz Started ---\n")
+    # Combine both MCQs and Short Questions
+    all_questions = []
 
-    # MCQ Section
-    if mcqs:
-        print("--- Multiple Choice Questions ---\n")
-        for idx, mcq in enumerate(mcqs):
-            print(f"Q{idx + 1}. {mcq['question']}")
-            for option in ['a', 'b', 'c', 'd']:
-                print(f"  {option.upper()}. {mcq['options'][option]}")
-            ans = input("Your answer (a/b/c/d): ").strip().lower()
-            while ans not in ['a', 'b', 'c', 'd']:
-                ans = input("Invalid input. Enter only a/b/c/d: ").strip().lower()
+    for mcq in mcqs:
+        all_questions.append({
+            'type': 'mcq',
+            'question': mcq['question'],
+            'options': mcq['options'],
+            'answer': mcq['answer']
+        })
 
-            if ans == mcq['answer']:
-                score += 1
-                correct.append(mcq['question'])
+    for question, answer in short_ques:
+        all_questions.append({
+            'type': 'short',
+            'question': question,
+            'answer': answer
+        })
+
+    total = len(all_questions)
+    status = ['Not Attempted'] * total
+    index = 0
+
+    while True:
+        print("\n--- Quiz Menu ---")
+        print(f"Question {index + 1} of {total}")
+        print(f"Status: {status[index]}")
+        print("1. Answer this question")
+        print("2. Skip this question")
+        print("3. Go to another question")
+        print("4. View attempted/skipped status")
+        print("5. Submit quiz\n")
+
+        choice = input("Choose an option (1-5): ").strip()
+
+        if choice == '1':
+            q = all_questions[index]
+            print(f"\nQ{index + 1}. {q['question']}")
+            if q['type'] == 'mcq':
+                for opt in ['a', 'b', 'c', 'd']:
+                    print(f"  {opt.upper()}. {q['options'][opt]}")
+                ans = input("Your answer (a/b/c/d): ").strip().lower()
+                while ans not in ['a', 'b', 'c', 'd']:
+                    ans = input("Invalid input. Enter only a/b/c/d: ").strip().lower()
+                answers[index] = ans
+                status[index] = 'Attempted'
             else:
-                incorrect.append((mcq['question'], mcq['answer'].upper(), mcq['options'][mcq['answer']]))
-            print()
+                ans = input("Your answer: ").strip()
+                while not ans:
+                    ans = input("Answer cannot be empty. Please enter your answer: ").strip()
+                answers[index] = ans
+                status[index] = 'Attempted'
 
-    # Short Question Section
-    if short_ques:
-        print("--- Short Answer Questions ---\n")
-        for idx, (question, answer) in enumerate(short_ques):
-            print(f"Q{idx + 1 + len(mcqs)}. {question}")
-            ans = input("Your answer: ").strip()
-            while not ans:
-                ans = input("Answer cannot be empty. Please enter your answer: ").strip()
+        elif choice == '2':
+            print(f"Question {index + 1} skipped.")
+            skipped.add(index)
+            status[index] = 'Skipped'
 
-            if ans.lower() == answer.lower():
-                score += 1
-                correct.append(question)
+        elif choice == '3':
+            goto = input(f"Enter question number to go to (1-{total}): ").strip()
+            if goto.isdigit() and 1 <= int(goto) <= total:
+                index = int(goto) - 1
             else:
-                incorrect.append((question, answer))
-            print()
+                print("Invalid question number.")
 
+        elif choice == '4':
+            print("\nQuestion Status:")
+            for i, s in enumerate(status):
+                print(f"Q{i + 1}: {s}")
+        
+        elif choice == '5':
+            confirm = input("Are you sure you want to submit the quiz? (yes/no): ").strip().lower()
+            if confirm == 'yes':
+                break
+        else:
+            print("Invalid option. Please choose again.")
+
+    # Evaluate Answers
+    for idx, q in enumerate(all_questions):
+        if idx not in answers:
+            continue
+        user_ans = answers[idx]
+        if q['type'] == 'mcq':
+            if user_ans == q['answer']:
+                score += 1
+                correct.append(q['question'])
+            else:
+                incorrect.append((q['question'], q['answer'].upper(), q['options'][q['answer']]))
+        else:
+            if user_ans.lower() == q['answer'].lower():
+                score += 1
+                correct.append(q['question'])
+            else:
+                incorrect.append((q['question'], q['answer']))
+    
     print("--- Quiz Ended ---\n")
     return score, correct, incorrect
+
 
 
 def calculate_grade(score, total):
